@@ -22,14 +22,14 @@
     body{
       margin:0;
       background:linear-gradient(180deg,#e8f4ff 0%,var(--bg) 100%);
-      padding:28px;
+      padding:20px 16px;
       color:#0f1724;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:20px;
+      gap:16px;
       font-size:15px;
     }
 
@@ -48,7 +48,7 @@
     /* Left panel (info) */
     .panel{
       background:linear-gradient(180deg,#e8f4ff 0%, #ffffff 40%);
-      padding:28px;
+      padding:24px 20px;
       border-right:1px solid rgba(15,23,36,0.04);
     }
     .brand{
@@ -79,7 +79,7 @@
 
     /* right panel */
     .main{
-      padding:26px 28px; position:relative;
+      padding:24px 20px; position:relative;
       display:flex;flex-direction:column;
     }
 
@@ -176,13 +176,152 @@
       color: white;
     }
 
-    /* responsive */
-    @media (max-width:880px){
-      .app{grid-template-columns:1fr;min-height:760px}
-      .panel{order:2}
-      .main{order:1}
-      .actions{justify-content:center;}
-      .additional-actions{flex-direction:column;align-items:center;}
+    /* ========== RESPONSIVIDADE ========== */
+    
+    /* Tablets e telas menores */
+    @media (max-width: 880px) {
+      body {
+        padding: 16px 12px;
+        align-items: flex-start;
+      }
+      
+      .app {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        max-width: 100%;
+      }
+      
+      .panel {
+        order: 2;
+        padding: 20px 16px;
+        border-right: none;
+        border-top: 1px solid rgba(15,23,36,0.04);
+      }
+      
+      .main {
+        order: 1;
+        padding: 20px 16px;
+      }
+      
+      .progress-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .progress {
+        width: 100%;
+      }
+      
+      .progress-label {
+        text-align: left;
+        min-width: auto;
+      }
+      
+      .controls {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .actions {
+        justify-content: center;
+      }
+      
+      .additional-actions {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+    
+    /* Dispositivos móveis */
+    @media (max-width: 600px) {
+      body {
+        padding: 12px 8px;
+        font-size: 14px;
+      }
+      
+      .app {
+        border-radius: 14px;
+      }
+      
+      .panel, .main {
+        padding: 16px 12px;
+      }
+      
+      .brand {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+      
+      .question-card {
+        padding: 14px;
+        min-height: 280px;
+      }
+      
+      .options {
+        gap: 8px;
+      }
+      
+      .opt-btn {
+        min-width: 0;
+        flex: 1 1 calc(50% - 8px);
+        padding: 12px 8px;
+        font-size: 13px;
+      }
+      
+      .btn {
+        padding: 12px 14px;
+        width: 100%;
+        text-align: center;
+      }
+      
+      .btn.small {
+        padding: 10px 12px;
+      }
+      
+      .controls > div {
+        width: 100%;
+      }
+      
+      .controls > div:first-child {
+        display: flex;
+        gap: 8px;
+      }
+      
+      .controls > div:first-child .btn {
+        flex: 1;
+      }
+      
+      .summary .row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+      
+      .summary .row > div:last-child {
+        align-self: flex-end;
+      }
+      
+      .actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .actions .btn {
+        width: 100%;
+      }
+    }
+    
+    /* Telas muito pequenas (smartphones pequenos) */
+    @media (max-width: 380px) {
+      .opt-btn {
+        flex: 1 1 100%;
+      }
+      
+      .controls > div:first-child {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
