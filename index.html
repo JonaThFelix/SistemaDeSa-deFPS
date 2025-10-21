@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Modelo Teleatendimento - Enfermagem</title>
+  <style>
+    :root{
+      --bg:#f0f7ff;
+      --card:#ffffff;
+      --primary:#1a73e8;
+      --accent:#4dabf5;
+      --muted:#5f6368;
+      --success:#34a853;
+      --danger:#ea4335;
+      --shadow: 0 6px 20px rgba(33,40,55,0.08);
+      --radius:14px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#e8f4ff 0%,var(--bg) 100%);
+      padding:28px;
+      color:#0f1724;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      font-size:15px;
+    }
+
+    .app{
+      width:100%;
+      max-width:980px;
+      background:var(--card);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      min-height:620px;
+    }
+
+    /* Left panel (info) */
+    .panel{
+      background:linear-gradient(180deg,#e8f4ff 0%, #ffffff 40%);
+      padding:28px;
+      border-right:1px solid rgba(15,23,36,0.04);
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:12px;
+    }
+    .logo{
+      width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;
+      box-shadow:0 6px 18px rgba(26,115,232,0.16);
+    }
+    h1{margin:0;font-size:18px}
+    p.lead{margin:6px 0 18px;color:var(--muted);font-size:13px}
+
+    .meta{font-size:13px;color:var(--muted);margin-top:8px}
+    .small{font-size:13px;color:var(--muted);margin-top:6px}
+
+    .patient-card{
+      background:#fff;border-radius:12px;padding:14px;margin-top:18px; box-shadow: 0 4px 14px rgba(12,34,60,0.04);
+    }
+    .patient-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    .input{
+      width:100%;padding:10px;border-radius:10px;border:1px solid rgba(15,23,36,0.06);background:#fbfdff;
+      font-size:14px;
+    }
+
+    /* right panel */
+    .main{
+      padding:26px 28px; position:relative;
+      display:flex;flex-direction:column;
+    }
+
+    .progress-wrap{
+      display:flex;align-items:center;gap:12px;margin-bottom:18px;
+    }
+    .progress{
+      height:12px;background:rgba(15,23,36,0.06);border-radius:999px;flex:1;overflow:hidden;
+    }
+    .progress > i{
+      display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));
+      width:0%;
+      transition:width .35s ease;
+    }
+    .progress-label{
+      font-size:13px;color:var(--muted);min-width:95px;text-align:right;
+    }
+
+    .question-card{
+      background:linear-gradient(180deg,#ffffff 0,#fcfcff 100%);
+      border-radius:12px;padding:18px;border:1px solid rgba(15,23,36,0.04);
+      box-shadow:0 6px 20px rgba(17,24,39,0.03);
+      flex:1;display:flex;flex-direction:column;justify-content:space-between;
+      min-height:320px;
+    }
+
+    .q-title{font-weight:700;margin:0 0 8px}
+    .q-desc{color:var(--muted);font-size:14px;margin-bottom:14px}
+
+    .options{
+      display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;
+    }
+
+    .opt-btn{
+      border:1px solid rgba(15,23,36,0.06);
+      padding:10px 14px;border-radius:10px;background:#fff;cursor:pointer;
+      min-width:96px;text-align:center;font-weight:600;
+      box-shadow:0 6px 18px rgba(12,34,60,0.02);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .opt-btn:hover{transform:translateY(-3px)}
+    .opt-btn.active{
+      background:linear-gradient(90deg,var(--primary),var(--accent));
+      color:white;border-color:transparent;box-shadow:0 10px 30px rgba(26,115,232,0.18);
+    }
+
+    .other-input{
+      margin-top:10px; display:none;
+    }
+    .other-input textarea{width:100%;min-height:72px;padding:10px;border-radius:10px;border:1px solid rgba(15,23,36,0.06);resize:vertical}
+
+    .controls{
+      display:flex;justify-content:space-between;gap:12px;margin-top:16px;
+      align-items:center;
+    }
+    .btn{
+      padding:10px 16px;border-radius:10px;border:0;cursor:pointer;font-weight:700;
+      box-shadow:0 6px 20px rgba(12,34,60,0.05);
+      transition: all 0.2s ease;
+    }
+    .btn.primary{background:var(--primary);color:white}
+    .btn.ghost{background:#fff;border:1px solid rgba(15,23,36,0.06)}
+    .btn.small{padding:8px 12px;font-size:14px}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(12,34,60,0.1);}
+
+    .footer-note{font-size:13px;color:var(--muted);text-align:center;margin-top:12px}
+
+    /* summary */
+    .summary{
+      display:none;flex-direction:column;gap:12px;
+    }
+    .summary pre{
+      white-space:pre-wrap;background:#0f1724;color:#fff;padding:12px;border-radius:10px;font-size:13px;overflow:auto;
+    }
+    .summary .row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 8px;border-radius:8px;background:#fbfdff;border:1px solid rgba(15,23,36,0.03)}
+    .summary .label{font-weight:600}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* Botões adicionais */
+    .additional-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+    
+    .btn-home {
+      background: #4dabf5;
+      color: white;
+    }
+    
+    .btn-pdf {
+      background: #34a853;
+      color: white;
+    }
+
+    /* responsive */
+    @media (max-width:880px){
+      .app{grid-template-columns:1fr;min-height:760px}
+      .panel{order:2}
+      .main{order:1}
+      .actions{justify-content:center;}
+      .additional-actions{flex-direction:column;align-items:center;}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-labelledby="appTitle">
+    <div class="panel" aria-hidden="false">
+      <div class="brand">
+        <div class="logo">ENF</div>
+        <div>
+          <h1 id="appTitle">Teleatendimento - Enfermagem</h1>
+          <div class="meta">Modelo semanal · Insuficiência Cardíaca Classe III/IV</div>
+        </div>
+      </div>
+
+      <p class="lead">Olá Rebeca — formulário pronto para aplicar na visita telefônica. Todas as perguntas estão aqui; o paciente pode responder por seleção e também por "Outros".</p>
+
+      <div class="patient-card" aria-label="dados do paciente">
+        <div class="patient-row">
+          <input id="paciente" class="input" placeholder="Nome do paciente" value="" />
+        </div>
+        <div class="patient-row">
+          <input id="data" class="input" placeholder="Data (ex: 2025-10-21)" />
+        </div>
+        <div class="patient-row" style="gap:8px;">
+          <select id="classe" class="input" aria-label="classe">
+            <option value="">Classe funcional</option>
+            <option>Classe I</option>
+            <option>Classe II</option>
+            <option selected>Classe III</option>
+            <option>Classe IV</option>
+          </select>
+        </div>
+        <div class="small">As respostas são salvas localmente no navegador. Você pode exportar ou imprimir ao final.</div>
+      </div>
+
+      <div style="margin-top:18px">
+        <div class="small"><strong>Início (modelo de acolhimento):</strong></div>
+        <div class="small" style="margin-top:6px">
+          • Bom dia/tarde! Tudo bem com o(a) senhor(a)? Sou [seu nome], assistente de saúde do projeto de acompanhamento domiciliar. Estou entrando em contato para saber como tem se sentido nesta última semana e acompanhar sua saúde com atenção que o sr(a) merece..  </br>
+          • O (a) senhor(a) está com um tempinho para conversarmos alguns minutos sobre sua saúde, ou prefere que agendemos para outro momento?
+        </div>
+      </div>
+
+    </div>
+
+    <div class="main">
+      <div class="progress-wrap" aria-hidden="false">
+        <div style="min-width:220px">
+          <div style="font-size:14px;font-weight:700">Avaliação clínica e funcional</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">Responda as perguntas — avance para o resumo</div>
+        </div>
+        <div class="progress" aria-hidden="false"><i id="progBar"></i></div>
+        <div class="progress-label" id="progressLabel">0 / 0</div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div>
+          <div class="q-title" id="qTitle">Carregando...</div>
+          <div class="q-desc" id="qDesc"></div>
+
+          <div class="options" id="optionsContainer" role="list"></div>
+
+          <div class="other-input" id="otherBox">
+            <label style="font-weight:700;margin-bottom:6px;display:block">Outros / Observações</label>
+            <textarea id="otherText" placeholder="Escreva observações aqui..."></textarea>
+          </div>
+
+          <div id="extraInputs" style="margin-top:10px"></div>
+        </div>
+
+        <div class="controls" aria-hidden="false">
+          <div style="display:flex;gap:8px;">
+            <button class="btn ghost" id="prevBtn">Anterior</button>
+            <button class="btn ghost" id="nextBtn">Próxima</button>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn small" id="saveBtn">Salvar local</button>
+            <button class="btn primary" id="finishBtn">Concluir e ver resumo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary" id="summaryCard" aria-hidden="true" style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800;font-size:16px">Resumo das respostas</div>
+          <div class="actions">
+            <button class="btn ghost" id="editBtn">Editar respostas</button>
+            <button class="btn" id="downloadBtn">Exportar JSON</button>
+            <button class="btn primary" id="printBtn">Imprimir / PDF</button>
+            <button class="btn" id="clearBtn">Limpar</button>
+          </div>
+        </div>
+
+        <div id="summaryList" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+
+        <div style="margin-top:8px">
+          <div style="font-weight:700;margin-bottom:6px">Observações gerais (campo livre)</div>
+          <pre id="finalNotes">Sem observações</pre>
+        </div>
+        
+        <!-- Botões adicionais -->
+        <div class="additional-actions">
+          <button class="btn btn-home" id="homeBtn">Início</button>
+          <button class="btn btn-pdf" id="pdfBtn">Salvar como PDF</button>
+        </div>
+      </div>
+
+      <div class="footer-note">FPS</div>
+    </div>
+  </div>
+
+  <script>
+    // === Perguntas (copiadas/convertidas da imagem) ===
+    const QUESTIONS = [
+      {
+        id: 'dias',
+        title: 'Como têm sido seus dias?',
+        desc: 'Descreva de forma geral (Bom / Regular / Ruim).',
+        options: ['Bom', 'Regular', 'Ruim', 'Prefiro não responder', 'Outros']
+      },
+      {
+        id: 'inchaco',
+        title: 'Notou aumento de inchaço (nos pés, pernas, abdômen) em relação à semana passada?',
+        desc: 'Edema ou inchaço novo ou agravamento.',
+        options: ['Não', 'Sim leve', 'Sim moderado', 'Sim acentuado', 'Outros']
+      },
+      {
+        id: 'dor_peito',
+        title: 'Sentiu dor ou peso no peito, palpitações ou batimentos cardíacos irregulares?',
+        desc: '',
+        options: ['Não', 'Dor ocasional', 'Palpitações', 'Batimentos irregulares', 'Outros']
+      },
+      {
+        id: 'ganho_peso',
+        title: 'Teve ganho de peso recente (mais de 2 kg em poucos dias)?',
+        desc: '',
+        options: ['Não', 'Sim (≈2kg)', 'Sim (>2kg)', 'Não sei', 'Outros']
+      },
+      {
+        id: 'peso_frequencia',
+        title: 'Tem se pesado com frequência?',
+        desc: 'Se sim, informe o último peso anotado (kg).',
+        options: ['Não', 'Sim', 'Às vezes', 'Outros'],
+        extra: { type: 'weight', placeholder: 'Último peso anotado (kg)' }
+      },
+      {
+        id: 'urina',
+        title: 'Notou alguma alteração na urina (quantidade, cor escura, presença de espuma)?',
+        desc: '',
+        options: ['Não', 'Sim - pouca urina', 'Sim - escura', 'Sim - com espuma', 'Outros']
+      },
+      {
+        id: 'medicacao',
+        title: 'Está tomando todos os seus medicamentos conforme a orientação médica?',
+        desc: '',
+        options: ['Sim', 'Não', 'Às vezes', 'Outros']
+      },
+      {
+        id: 'reacao_meds',
+        title: 'Percebeu alguma reação diferente após os medicamentos (tontura, náusea, fraqueza, batimentos acelerados)?',
+        desc: '',
+        options: ['Não', 'Tontura', 'Náusea', 'Fraqueza', 'Batimentos acelerados', 'Outros']
+      },
+      {
+        id: 'atividades',
+        title: 'Conseguiu realizar suas atividades básicas (higiene pessoal, alimentação, locomoção)?',
+        desc: '',
+        options: ['Sim sem ajuda', 'Com ajuda', 'Não consegue', 'Às vezes', 'Outros']
+      },
+      {
+        id: 'apoio_familia',
+        title: 'Tem recebido apoio da família ou de algum cuidador durante a semana?',
+        desc: '',
+        options: ['Sim', 'Não', 'Às vezes', 'Outros']
+      },
+      {
+        id: 'alimentacao',
+        title: 'Está se alimentando bem? Tem ingerido líquidos conforme orientado pela equipe?',
+        desc: '',
+        options: ['Sim', 'Não', 'Às vezes', 'Outros']
+      },
+      {
+        id: 'emocional',
+        title: 'Como tem se sentido emocionalmente?',
+        desc: 'Marque a opção que melhor descreve.',
+        options: ['Tranquilo(a)', 'Preocupado(a)', 'Desanimado(a)', 'Irritado(a)', 'Outros']
+      },
+      {
+        id: 'conforto_espiritual',
+        title: 'Tem buscado alguma forma de conforto espiritual ou apoio emocional?',
+        desc: '',
+        options: ['Sim', 'Não', 'Procura suporte', 'Outros']
+      },
+      {
+        id: 'duvidas',
+        title: 'Há alguma dúvida, queixa ou algo que gostaria de compartilhar comigo neste momento?',
+        desc: '',
+        options: ['Não', 'Sim - tenho algo a relatar', 'Outros'],
+        extra: { type: 'longnote', placeholder: 'Escreva a queixa ou dúvida aqui...' }
+      }
+    ];
+
+    // State
+    let answers = {}; // {questionId: {choice:..., other:..., extra:...}}
+    let currentIndex = 0;
+
+    // DOM refs
+    const prog = document.getElementById('progBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const qTitle = document.getElementById('qTitle');
+    const qDesc = document.getElementById('qDesc');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const otherBox = document.getElementById('otherBox');
+    const otherText = document.getElementById('otherText');
+    const extraInputs = document.getElementById('extraInputs');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const summaryCard = document.getElementById('summaryCard');
+    const summaryList = document.getElementById('summaryList');
+    const finalNotes = document.getElementById('finalNotes');
+    const editBtn = document.getElementById('editBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const printBtn = document.getElementById('printBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const homeBtn = document.getElementById('homeBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
+    const pacienteEl = document.getElementById('paciente');
+    const dataEl = document.getElementById('data');
+    const classeEl = document.getElementById('classe');
+
+    const total = QUESTIONS.length;
+
+    // Initialize
+    function init(){
+      // load saved if exists
+      const saved = localStorage.getItem('teleatendimento_answers_v1');
+      if (saved){
+        try{
+          const parsed = JSON.parse(saved);
+          if (confirm('Encontramos respostas salvas localmente. Deseja carregá-las?')){
+            answers = parsed.answers || {};
+            currentIndex = parsed.currentIndex || 0;
+            pacienteEl.value = parsed.paciente || '';
+            dataEl.value = parsed.data || '';
+            classeEl.value = parsed.classe || classeEl.value;
+          }
+        }catch(e){}
+      }
+      renderQuestion();
+      updateProgress();
+    }
+
+    function updateProgress(){
+      const pct = Math.round(((currentIndex)/total) * 100);
+      prog.style.width = pct + '%';
+      progressLabel.textContent = (currentIndex+1) + ' / ' + total;
+    }
+
+    function renderQuestion(){
+      const q = QUESTIONS[currentIndex];
+      qTitle.textContent = q.title;
+      qDesc.textContent = q.desc || '';
+      optionsContainer.innerHTML = '';
+      otherBox.style.display = 'none';
+      otherText.value = '';
+
+      // create option buttons
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.type = 'button';
+        btn.textContent = opt;
+        btn.setAttribute('data-value', opt);
+        btn.addEventListener('click', ()=> handleSelect(q.id, opt, btn));
+        optionsContainer.appendChild(btn);
+      });
+
+      // extra inputs (weight, longnote, etc.)
+      extraInputs.innerHTML = '';
+      if (q.extra){
+        if (q.extra.type === 'weight'){
+          const inp = document.createElement('input');
+          inp.type = 'number';
+          inp.step='0.1';
+          inp.min='0';
+          inp.placeholder = q.extra.placeholder || 'kg';
+          inp.className = 'input';
+          inp.style.marginTop='8px';
+          inp.id = 'extra_'+q.id;
+          extraInputs.appendChild(inp);
+        }
+        if (q.extra.type === 'longnote'){
+          const ta = document.createElement('textarea');
+          ta.placeholder = q.extra.placeholder || '';
+          ta.className = 'input';
+          ta.style.minHeight = '90px';
+          ta.id = 'extra_'+q.id;
+          extraInputs.appendChild(ta);
+        }
+      }
+
+      // restore previously selected
+      const ans = answers[q.id] || {};
+      if (ans.choice){
+        const btns = optionsContainer.querySelectorAll('.opt-btn');
+        btns.forEach(b=>{
+          if (b.getAttribute('data-value') === ans.choice) b.classList.add('active');
+        });
+        if (ans.choice === 'Outros' || (ans.choice && ans.choice.startsWith('Outros'))){
+          otherBox.style.display='block';
+          otherText.value = ans.other || '';
+        }
+      }
+
+      // restore extra
+      if (ans.extra){
+        const ex = document.getElementById('extra_'+q.id);
+        if (ex) ex.value = ans.extra;
+      }
+
+      // update nav buttons
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === total - 1;
+      updateProgress();
+      summaryCard.style.display = 'none';
+      document.getElementById('questionCard').style.display = 'flex';
+    }
+
+    function handleSelect(qid, choice, btn){
+      // toggle active
+      const q = QUESTIONS[currentIndex];
+      const btns = optionsContainer.querySelectorAll('.opt-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // show 'other' area if needed
+      if (choice === 'Outros' || choice === 'Outros ' || choice.toLowerCase().includes('outros')){
+        otherBox.style.display = 'block';
+      } else {
+        otherBox.style.display = 'none';
+      }
+
+      // store
+      const extraEl = document.getElementById('extra_'+qid);
+      answers[qid] = {
+        choice: choice,
+        other: (choice === 'Outros') ? (otherText.value || '') : '',
+        extra: extraEl ? (extraEl.value || '') : ''
+      };
+      // keep other text sync
+      otherText.oninput = function(){ if(!answers[qid]) answers[qid]={}; answers[qid].other = this.value; saveToLocal(false); };
+      if (extraEl){
+        extraEl.oninput = function(){ if(!answers[qid]) answers[qid]={}; answers[qid].extra = this.value; saveToLocal(false); };
+      }
+      saveToLocal(false);
+    }
+
+    // nav
+    prevBtn.addEventListener('click', ()=>{
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion();
+      }
+    });
+    nextBtn.addEventListener('click', ()=>{
+      if (currentIndex < total - 1) {
+        currentIndex++;
+        renderQuestion();
+      }
+    });
+
+    finishBtn.addEventListener('click', ()=>{
+      // make sure we save last other field if visible
+      const q = QUESTIONS[currentIndex];
+      if (otherBox.style.display === 'block'){
+        if(!answers[q.id]) answers[q.id] = {};
+        answers[q.id].other = otherText.value;
+      }
+      const extraEl = document.getElementById('extra_'+q.id);
+      if(extraEl){
+        if(!answers[q.id]) answers[q.id] = {};
+        answers[q.id].extra = extraEl.value;
+      }
+
+      showSummary();
+      saveToLocal(true);
+    });
+
+    saveBtn.addEventListener('click', ()=>{
+      saveToLocal(true);
+      alert('Respostas salvas localmente.');
+    });
+
+    editBtn.addEventListener('click', ()=>{
+      // hide summary and go to first unanswered or beginning
+      document.getElementById('questionCard').style.display = 'flex';
+      summaryCard.style.display = 'none';
+      // go to first question
+      currentIndex = 0;
+      renderQuestion();
+    });
+    
+    // Botão Início
+    homeBtn.addEventListener('click', ()=>{
+      document.getElementById('questionCard').style.display = 'flex';
+      summaryCard.style.display = 'none';
+      currentIndex = 0;
+      renderQuestion();
+    });
+    
+    // Botão PDF
+    pdfBtn.addEventListener('click', ()=> {
+      generatePDF();
+    });
+
+    downloadBtn.addEventListener('click', ()=> {
+      const payload = collectAll();
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const name = (document.getElementById('paciente').value || 'paciente').replace(/\s+/g,'_');
+      a.download = `teleatendimento_${name}_${(new Date()).toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    printBtn.addEventListener('click', ()=> {
+      // prepare printable page
+      const payload = collectAll();
+      const w = window.open('', '_blank');
+      w.document.write('<title>Resumo Teleatendimento</title>');
+      w.document.write('<style>body{font-family:Arial,Helvetica,sans-serif;padding:18px;color:#0b1220}h1{font-size:20px}pre{white-space:pre-wrap}</style>');
+      w.document.write('<h1>Resumo Teleatendimento</h1>');
+      w.document.write('<pre>' + JSON.stringify(payload, null, 2) + '</pre>');
+      w.document.close();
+      w.print();
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      if (!confirm('Limpar todas as respostas salvas e reiniciar?')) return;
+      answers = {};
+      currentIndex = 0;
+      pacienteEl.value = '';
+      dataEl.value = '';
+      classeEl.value = 'Classe III';
+      localStorage.removeItem('teleatendimento_answers_v1');
+      renderQuestion();
+      alert('Limpo.');
+    });
+
+    function showSummary(){
+      summaryList.innerHTML = '';
+      for (const q of QUESTIONS){
+        const row = document.createElement('div');
+        row.className = 'row';
+        const left = document.createElement('div');
+        left.style.flex='1';
+        const lbl = document.createElement('div');
+        lbl.className='label';
+        lbl.textContent = q.title;
+        const small = document.createElement('div');
+        small.style.color='var(--muted)';
+        small.style.fontSize='13px';
+        const ans = answers[q.id] || {};
+        small.textContent = (ans.choice ? ans.choice : '---') + (ans.other ? (' · ' + ans.other) : '') + (ans.extra ? (' · ' + ans.extra) : '');
+        left.appendChild(lbl);
+        left.appendChild(small);
+        const right = document.createElement('div');
+        right.style.minWidth='110px';
+        right.style.textAlign='right';
+        right.textContent = ans.choice ? 'Respondido' : 'Sem resposta';
+        row.appendChild(left);
+        row.appendChild(right);
+        summaryList.appendChild(row);
+      }
+
+      const payload = collectAll();
+      finalNotes.textContent = payload.observacoes || 'Sem observações';
+      document.getElementById('questionCard').style.display = 'none';
+      summaryCard.style.display = 'flex';
+      summaryCard.scrollIntoView({behavior:'smooth'});
+    }
+
+    function collectAll(){
+      return {
+        paciente: pacienteEl.value || '',
+        data: dataEl.value || (new Date()).toLocaleDateString(),
+        classe: classeEl.value || '',
+        respostas: answers,
+        observacoes: computeObservations()
+      };
+    }
+
+    function computeObservations(){
+      // try to aggregate 'Outros' or last question notes
+      let obs = [];
+      for (const q of QUESTIONS){
+        const a = answers[q.id];
+        if (!a) continue;
+        if (a.other) obs.push(`${q.title} — ${a.other}`);
+        if (a.extra) obs.push(`${q.title} — ${a.extra}`);
+      }
+      if (obs.length) return obs.join('\\n');
+      return '';
+    }
+
+    function saveToLocal(notify = false){
+      const payload = {
+        paciente: pacienteEl.value,
+        data: dataEl.value,
+        classe: classeEl.value,
+        answers: answers,
+        currentIndex: currentIndex
+      };
+      localStorage.setItem('teleatendimento_answers_v1', JSON.stringify(payload));
+      if (notify) {
+        // small visual indicator could be added
+      }
+    }
+    
+    // Função para gerar PDF
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Configurações iniciais
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let yPosition = 20;
+      
+      // Título
+      doc.setFontSize(18);
+      doc.setTextColor(26, 115, 232);
+      doc.text('Relatório de Teleatendimento - Enfermagem', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 15;
+      
+      // Informações do paciente
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Paciente: ${pacienteEl.value || 'Não informado'}`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`Data: ${dataEl.value || 'Não informada'}`, 20, yPosition);
+      yPosition += 7;
+      doc.text(`Classe Funcional: ${classeEl.value || 'Não informada'}`, 20, yPosition);
+      yPosition += 15;
+      
+      // Respostas das perguntas
+      doc.setFontSize(14);
+      doc.setTextColor(26, 115, 232);
+      doc.text('Respostas do Questionário:', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      
+      for (const q of QUESTIONS) {
+        // Verificar se precisa de nova página
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        const ans = answers[q.id] || {};
+        const resposta = (ans.choice ? ans.choice : 'Sem resposta') + 
+                        (ans.other ? (' - ' + ans.other) : '') + 
+                        (ans.extra ? (' - ' + ans.extra) : '');
+        
+        // Pergunta
+        doc.setFont(undefined, 'bold');
+        doc.text(`• ${q.title}:`, 20, yPosition);
+        yPosition += 5;
+        
+        // Resposta
+        doc.setFont(undefined, 'normal');
+        const lines = doc.splitTextToSize(resposta, pageWidth - 40);
+        doc.text(lines, 25, yPosition);
+        yPosition += (lines.length * 5) + 8;
+      }
+      
+      // Observações
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      doc.setFontSize(14);
+      doc.setTextColor(26, 115, 232);
+      doc.text('Observações Gerais:', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      const observacoes = finalNotes.textContent || 'Sem observações';
+      const obsLines = doc.splitTextToSize(observacoes, pageWidth - 40);
+      doc.text(obsLines, 20, yPosition);
+      
+      // Rodapé
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Relatório gerado em ${dataAtual} - Sistema de Teleatendimento`, pageWidth / 2, 280, { align: 'center' });
+      
+      // Salvar o PDF
+      const nomeArquivo = `teleatendimento_${pacienteEl.value || 'paciente'}_${dataEl.value || dataAtual.replace(/\//g, '-')}.pdf`;
+      doc.save(nomeArquivo);
+    }
+
+    // quick keyboard navigation (optional)
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'ArrowRight') nextBtn.click();
+      if (e.key === 'ArrowLeft') prevBtn.click();
+    });
+
+    // initial call
+    init();
+
+    // Make sure otherText updates state if visible even without clicking 'Outros' button restored
+    otherText.addEventListener('input', ()=>{
+      const q = QUESTIONS[currentIndex];
+      if(!answers[q.id]) answers[q.id] = {};
+      answers[q.id].other = otherText.value;
+      saveToLocal(false);
+    });
+
+  </script>
+  <!-- Incluir a biblioteca jsPDF para gerar PDFs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+</html>
